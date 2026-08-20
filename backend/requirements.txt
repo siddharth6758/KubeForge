@@ -1,0 +1,8 @@
+fastapi[standard]
+uvicorn
+SQLAlchemy
+pydantic-settings
+datetime
+logging
+asyncpg
+psycopg2-binary

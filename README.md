@@ -4,3 +4,7 @@
 # Day 1
 - Initialize github repository: <strong>KubeForge</strong>
 - Plan out the structure of the project
+
+# Day 2
+- Setup PostgresDB and Redis using docker containers
+- Plan the structure of Backend Architecture

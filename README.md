@@ -8,3 +8,7 @@
 # Day 2
 - Setup PostgresDB and Redis using docker containers
 - Plan the structure of Backend Architecture
+- Add database engine and Tables for User and Notification (Postgre and Redis are containerized, so this app cannot run as a standalone backend)
+
+# Day 3
+- Containerize the Backend application and connect with database and redis

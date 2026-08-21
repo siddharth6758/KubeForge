@@ -1,4 +1,22 @@
 services:
+    api-backend:
+        build: 
+            context: ./backend
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        ports:
+            - "8080:8080"
+        restart: always
+        container_name: api_backend
+        networks:
+            - notification_network
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+
     db:
         image: postgres:17-alpine
         container_name: postgres_db
@@ -15,6 +33,7 @@ services:
         networks:
             - notification_network
         healthcheck:
+            test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
             interval: 10s
             timeout: 5s
             retries: 5
@@ -31,6 +50,7 @@ services:
         networks:
             - notification_network
         healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
             interval: 10s
             timeout: 5s
             retries: 5

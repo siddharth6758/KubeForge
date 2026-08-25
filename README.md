@@ -15,3 +15,4 @@
 
 # Day 4
 - Write the remaining read/write logic and endpoints for FastAPI
+- Figure out how to implement Redis PUB/SUB to provide real-time event notification

@@ -6,3 +6,4 @@ datetime
 logging
 asyncpg
 psycopg2-binary
+redis

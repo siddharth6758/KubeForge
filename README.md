@@ -12,3 +12,6 @@
 
 # Day 3
 - Containerize the Backend application and connect with database and redis
+
+# Day 4
+- Write the remaining read/write logic and endpoints for FastAPI

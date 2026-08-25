@@ -46,7 +46,7 @@ class NotificationSchedule(Base):
         nullable = True
     )
     scheduled_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
     )
     is_notified: Mapped[bool] = mapped_column(

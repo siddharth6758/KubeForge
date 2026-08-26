@@ -1,7 +1,9 @@
 import logging
+import redis
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Body
-from db.engine import engine, SessionLocal
+from config.settings import settings
+from db.engine import engine, get_db
 from db.database import Base
 from db.helper import *
 from typing import Optional
@@ -20,13 +22,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-def get_db():
-    db = SessionLocal()
-    log.info("\nDB Session created...")
-    try:
-        yield db
-    finally:
-        db.close()
+redis_conn = redis.Redis(
+    host="localhost",
+    port=6753,
+    password=settings.redis_password,
+    decode_responses=True
+)
+log.info("Redis Server setup complete!")
 
 @app.get("/")
 async def root():
@@ -50,7 +52,19 @@ async def user_pending_notification(user_id: int, db: Session = Depends(get_db))
 
 @app.post("/notification/")
 async def create_notification(user_id: int = Body(...), title: str = Body(...), description: str = Body(...), scheduled_at: datetime = Body(...), db: Session = Depends(get_db)):
-    return add_notification(db, user_id, title, description, scheduled_at)
+    notification = add_notification(db, user_id, title, description, scheduled_at)
+    if notification:
+        reminder_id = f"U{user_id}_N{notification.notification_id}"
+        redis_conn.zadd(
+            "reminders",
+            {f"reminder:{reminder_id}": notification.scheduled_at}
+        )
+        return notification
+    else:
+        return {
+            "status": 500,
+            "message": "Internal Server Error"
+        }
 
 @app.patch("/notification-update/{notification_id}")
 async def update_notified_notification(notification_id: int, title: Optional[str] = Body(None), description: Optional[str] = Body(None), scheduled_at: Optional[datetime] = Body(None), db: Session = Depends(get_db)):
@@ -58,8 +72,13 @@ async def update_notified_notification(notification_id: int, title: Optional[str
     if notification:
         is_notified = False
         scheduled_at = scheduled_at.astimezone(IST)
-        if scheduled_at is not None and scheduled_at > notification.scheduled_at:
+        if scheduled_at is not None and notification.scheduled_at >= scheduled_at:
             is_notified = True
+            reminder_id = f"U{notification.user_id}_N{notification.notification_id}"
+            redis_conn.zadd(
+                "reminders",
+                {f"reminder:{reminder_id}": scheduled_at}
+            )
         return update_notification_sent(db, notification, title, description, scheduled_at, is_notified)
     else:
         raise HTTPException(status_code=404, detail="Notification not found")

@@ -13,3 +13,11 @@ SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False
 )
+
+def get_db():
+    db = SessionLocal()
+    log.info("\nDB Session created...")
+    try:
+        yield db
+    finally:
+        db.close()

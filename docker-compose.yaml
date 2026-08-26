@@ -18,6 +18,28 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
+            worker:
+                condition: service_healthy
+
+    worker:
+        build: 
+            context: ./backend
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        ports:
+            - "8675:8675"
+        volumes:
+            - ./backend:/worker
+        restart: always
+        container_name: worker
+        networks:
+            - notification_network
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8675/healthcheck"]
+        depends_on:
+            redis:
+                condition: service_healthy
 
     db:
         image: postgres:17-alpine
@@ -45,7 +67,7 @@ services:
         container_name: redis_cache
         restart: unless-stopped
         ports:
-        - "6753:6753"
+        - "6753:6379"
         command: redis-server --requirepass ${REDIS_PASSWORD}
         volumes:
             - ./data/redis_data:/data

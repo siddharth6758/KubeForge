@@ -6,9 +6,11 @@ from notifypy import Notify
 from db.engine import SessionLocal
 from config.settings import settings
 from db.helper import get_notification_helper
-from app import app
+from fastapi import FastAPI
 
 log = logging.getLogger(__name__)
+
+redis_app = FastAPI()
 
 r = redis.Redis(
     host="localhost",
@@ -17,8 +19,8 @@ r = redis.Redis(
     decode_responses=True
 )
 
-@app.get('/healthcheck')
-def healthcheck_worker():
+@redis_app.get('/healthcheck')
+async def healthcheck_worker():
     return {"status":200, "message": "ok"}
 
 while True:
@@ -30,6 +32,8 @@ while True:
     )
 
     db = SessionLocal()
+
+    log.info(f"[WORKER] info running at: {now}")
 
     notification = Notify()
 

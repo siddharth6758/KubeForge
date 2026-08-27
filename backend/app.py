@@ -11,6 +11,11 @@ from zoneinfo import ZoneInfo
 
 IST = ZoneInfo("Asia/Kolkata")
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
 log = logging.getLogger(__name__)
 
 @asynccontextmanager
@@ -23,8 +28,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 redis_conn = redis.Redis(
-    host="localhost",
-    port=6753,
+    host="redis",
+    port=6379,
     password=settings.redis_password,
     decode_responses=True
 )
@@ -55,10 +60,12 @@ async def create_notification(user_id: int = Body(...), title: str = Body(...), 
     notification = add_notification(db, user_id, title, description, scheduled_at)
     if notification:
         reminder_id = f"U{user_id}_N{notification.notification_id}"
+        scheduled_at_unix = convert_to_unix(notification.scheduled_at)
         redis_conn.zadd(
             "reminders",
-            {f"reminder:{reminder_id}": notification.scheduled_at}
+            {f"reminder:{reminder_id}": scheduled_at_unix}
         )
+        log.info(f"Added to Redis sorted set: {reminder_id}")
         return notification
     else:
         return {
@@ -71,14 +78,16 @@ async def update_notified_notification(notification_id: int, title: Optional[str
     notification = db.get(NotificationSchedule, notification_id)
     if notification:
         is_notified = False
-        scheduled_at = scheduled_at.astimezone(IST)
-        if scheduled_at is not None and notification.scheduled_at >= scheduled_at:
-            is_notified = True
+        if scheduled_at:
+            scheduled_at = scheduled_at.astimezone(IST)
+            is_notified = True if notification.scheduled_at >= scheduled_at else False
             reminder_id = f"U{notification.user_id}_N{notification.notification_id}"
+            scheduled_at_unix = convert_to_unix(scheduled_at)
             redis_conn.zadd(
                 "reminders",
-                {f"reminder:{reminder_id}": scheduled_at}
+                {f"reminder:{reminder_id}": scheduled_at_unix}
             )
+            log.info(f"Updated to redis sorted set: {reminder_id}")
         return update_notification_sent(db, notification, title, description, scheduled_at, is_notified)
     else:
         raise HTTPException(status_code=404, detail="Notification not found")

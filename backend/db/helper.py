@@ -7,6 +7,10 @@ from db.database import User, NotificationSchedule
 
 IST = ZoneInfo("Asia/Kolkata")
 
+def convert_to_unix(scheduled_at: datetime):
+    dt_timestamp = scheduled_at.timestamp()
+    return dt_timestamp
+
 def add_user_helper(db: Session, username: str):
     db_item = User(username=username)
     db.add(db_item)

@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 8675
 
-CMD ["python", "worker.py"]
+CMD ["uvicorn", "redis_worker.worker:redis_app", "--host", "0.0.0.0", "--port", "8675"]

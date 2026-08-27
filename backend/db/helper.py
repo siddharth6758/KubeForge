@@ -33,7 +33,18 @@ def get_notification_helper(db: Session, notification_id: int):
     return db.get(NotificationSchedule, notification_id)
 
 def get_pending_notifications(db: Session, user_id: int):
-    return NotificationSchedule.select().where(NotificationSchedule.user_id==user_id).where(NotificationSchedule.is_notified==False)
+    return db.query(NotificationSchedule).filter(
+            NotificationSchedule.user_id == user_id,
+            NotificationSchedule.is_notified == False
+        ).all()
+
+def delete_notification_helper(db: Session, notification_id: int):
+    item = db.get(NotificationSchedule, notification_id)
+    if not item:
+        return None
+    db.delete(item)
+    db.commit()
+    return {"status": 200, "message": "Notifcation deleted successfully"}
 
 def update_notification_sent(db: Session, notification: NotificationSchedule, title: str|None, description: str|None, scheduled_at: datetime|None, is_notified: bool):
     if notification:
@@ -51,4 +62,4 @@ def update_notification_sent(db: Session, notification: NotificationSchedule, ti
         db.refresh(notification)
         return notification
     else:
-        return {"status": 404, "message": f"Notification not found: {notification_id}"}
+        return {"status": 404, "message": f"Notification not found: {notification.notification_id}"}

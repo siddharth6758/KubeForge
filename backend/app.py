@@ -1,7 +1,9 @@
 import logging
 import redis
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi.responses import FileResponse
 from config.settings import settings
 from db.engine import engine, get_db
 from db.database import Base
@@ -17,6 +19,7 @@ logging.basicConfig(
 )
 
 log = logging.getLogger(__name__)
+FRONTEND_FILE = Path(__file__).parent / "templates" / "index.html"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,7 +40,7 @@ log.info("Redis Server setup complete!")
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return FileResponse(FRONTEND_FILE)
 
 @app.post("/user-create/")
 async def create_user(username: str = Body(...), db: Session = Depends(get_db)):
@@ -54,6 +57,13 @@ async def get_notification(notification_id: int, db: Session = Depends(get_db)):
 @app.get("/pending-notification/{user_id}")
 async def user_pending_notification(user_id: int, db: Session = Depends(get_db)):
     return get_pending_notifications(db, user_id)
+
+@app.delete("/notification/{notification_id}")
+async def delete_notification(notification_id: int, db: Session = Depends(get_db)):
+    resp = delete_notification_helper(db, notification_id)
+    if not resp:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return resp
 
 @app.post("/notification/")
 async def create_notification(user_id: int = Body(...), title: str = Body(...), description: str = Body(...), scheduled_at: datetime = Body(...), db: Session = Depends(get_db)):

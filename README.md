@@ -28,5 +28,8 @@
 
 # Day 7
 - Convert the worker script to a seperate FastAPI application for healtcheck and docker-compose.yaml dependency purpose
-- Create Frontend (HTML) for the FastAPI Application (used AI for this as main goal is to learn k8s)
+- Create Frontend (HTML, CSS and JS) for the FastAPI Application (used AI for this as main goal is to learn k8s)
 - Fix timezone issue: converted all time-inputs to IST and also accepts only IST timezone
+
+# Day 8
+- 

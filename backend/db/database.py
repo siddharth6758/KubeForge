@@ -34,7 +34,7 @@ class NotificationSchedule(Base):
     )
     user_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("user.user_id"),
+        ForeignKey("user.user_id", ondelete="CASCADE"),
         nullable=False
     )
     title: Mapped[str] = mapped_column(

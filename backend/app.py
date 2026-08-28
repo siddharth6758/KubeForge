@@ -3,6 +3,7 @@ import redis
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from config.settings import settings
 from db.engine import engine, get_db
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
     engine.dispose()
 
 app = FastAPI(lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "templates"), name="static")
 
 redis_conn = redis.Redis(
     host="redis",

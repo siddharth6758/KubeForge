@@ -4,117 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pulseboard | Notifications</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
-    :root {
-      --ink: #172323;
-      --muted: #687574;
-      --paper: #f4f1e9;
-      --white: #fffdf8;
-      --line: #d8ddd5;
-      --mint: #b8e8cf;
-      --mint-dark: #12694c;
-      --coral: #ec765f;
-      --shadow: 0 18px 45px rgba(28, 48, 43, .10);
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background: var(--paper);
-      font-family: 'Space Grotesk', sans-serif;
-      min-height: 100vh;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      opacity: .45;
-      background-image: linear-gradient(rgba(18, 105, 76, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 105, 76, .055) 1px, transparent 1px);
-      background-size: 34px 34px;
-      mask-image: linear-gradient(to bottom, #000, transparent 85%);
-    }
-
-    button, input, textarea { font: inherit; }
-    button { cursor: pointer; }
-    .hidden { display: none !important; }
-
-    .login-shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: minmax(280px, .8fr) minmax(340px, 1.2fr);
-      align-items: center;
-      gap: 6vw;
-      max-width: 1160px;
-      padding: 7vw;
-      margin: auto;
-    }
-    .kicker, .eyebrow {
-      color: var(--mint-dark);
-      font: 500 12px 'DM Mono', monospace;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-    h1, h2, p { margin-top: 0; }
-    .login-copy h1 { max-width: 440px; margin: 18px 0; font-size: clamp(42px, 6vw, 76px); line-height: .96; letter-spacing: -.055em; }
-    .login-copy p { max-width: 380px; color: var(--muted); font-size: 17px; line-height: 1.6; }
-    .login-panel, .editor, .notification-card {
-      background: rgba(255, 253, 248, .88);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-    }
-    .login-panel { padding: 34px; border-radius: 3px; }
-    .login-panel h2 { margin-bottom: 8px; font-size: 26px; }
-    .login-panel > p { color: var(--muted); font-size: 14px; line-height: 1.5; }
-    label { display: block; margin: 22px 0 8px; color: var(--muted); font: 500 12px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
-    input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 2px; padding: 13px 14px; color: var(--ink); background: var(--white); outline: none; }
-    input:focus, textarea:focus { border-color: var(--mint-dark); box-shadow: 0 0 0 3px rgba(184, 232, 207, .55); }
-    textarea { min-height: 92px; resize: vertical; }
-    .primary { width: 100%; margin-top: 24px; padding: 14px 18px; border: 0; border-radius: 2px; color: #fffdf8; background: var(--mint-dark); font-weight: 600; }
-    .primary:hover { background: #0b513a; }
-    .status { min-height: 20px; margin: 14px 0 0; color: var(--coral); font-size: 13px; }
-
-    .app-shell { width: min(1180px, calc(100% - 48px)); margin: auto; padding: 38px 0 70px; }
-    .topbar { display: flex; justify-content: space-between; align-items: end; gap: 20px; padding-bottom: 34px; border-bottom: 1px solid var(--line); }
-    .topbar h1 { margin: 10px 0 0; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.055em; line-height: 1; }
-    .user-chip { padding: 10px 13px; border: 1px solid var(--line); background: var(--white); font: 500 12px 'DM Mono', monospace; }
-    .workspace { display: grid; grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr); gap: 42px; padding-top: 38px; }
-    .editor { align-self: start; padding: 26px; border-radius: 3px; }
-    .editor h2 { margin: 10px 0 4px; font-size: 25px; }
-    .editor .subtle { color: var(--muted); font-size: 14px; }
-    .form-actions { display: flex; gap: 10px; }
-    .form-actions .primary { width: auto; flex: 1; }
-    .secondary { margin-top: 24px; padding: 13px 18px; border: 1px solid var(--line); border-radius: 2px; color: var(--ink); background: transparent; }
-    .secondary:hover { border-color: var(--mint-dark); }
-    .list-heading { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
-    .list-heading h2 { margin: 0; font-size: 25px; }
-    .count { color: var(--muted); font: 12px 'DM Mono', monospace; }
-    .notification-list { display: grid; gap: 14px; }
-    .notification-card { padding: 21px; border-radius: 3px; animation: arrive .35s ease both; }
-    @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .card-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font: 11px 'DM Mono', monospace; text-transform: uppercase; }
-    .notification-card h3 { margin: 15px 0 8px; font-size: 21px; }
-    .notification-card p { margin-bottom: 18px; color: var(--muted); line-height: 1.5; white-space: pre-wrap; }
-    .card-actions { display: flex; gap: 8px; }
-    .card-actions button { padding: 8px 11px; border: 1px solid var(--line); border-radius: 2px; color: var(--ink); background: transparent; font-size: 12px; }
-    .card-actions button:hover { border-color: var(--mint-dark); }
-    .card-actions .danger:hover { color: var(--coral); border-color: var(--coral); }
-    .empty { padding: 45px 20px; border: 1px dashed #bfc9c1; color: var(--muted); text-align: center; }
-
-    @media (max-width: 760px) {
-      .login-shell { display: block; padding: 56px 24px; }
-      .login-copy { margin-bottom: 38px; }
-      .login-copy h1 { font-size: 54px; }
-      .app-shell { width: min(100% - 32px, 600px); padding-top: 24px; }
-      .topbar { align-items: start; flex-direction: column; }
-      .workspace { display: block; }
-      .editor { margin-bottom: 42px; }
-    }
-  </style>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <main id="loginView" class="login-shell">
@@ -164,74 +54,12 @@
       </section>
     </section>
   </main>
+  <aside id="notificationModal" class="notification-modal hidden" role="status" aria-live="polite" aria-label="Notification">
+    <div class="eyebrow">Notification received</div>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDescription"></p>
+  </aside>
 
-  <script>
-    const state = { user: null, editingId: null };
-    const $ = (id) => document.getElementById(id);
-    const showStatus = (id, message, error = true) => { const node = $(id); node.textContent = message; node.style.color = error ? 'var(--coral)' : 'var(--mint-dark)'; };
-
-    async function request(path, options = {}) {
-      const response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.detail || body.message || `Request failed (${response.status})`);
-      return body;
-    }
-
-    $('loginForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      showStatus('loginStatus', 'Connecting...', false);
-      try {
-        state.user = await request('/user-create/', { method: 'POST', body: JSON.stringify($('username').value.trim()) });
-        $('loginView').classList.add('hidden');
-        $('appView').classList.remove('hidden');
-        $('userChip').textContent = `USER #${state.user.user_id} / ${state.user.username}`;
-        await loadNotifications();
-      } catch (error) { showStatus('loginStatus', error.message); }
-    });
-
-    async function loadNotifications() {
-      const list = $('notificationList');
-      list.innerHTML = '<div class="empty">Loading your schedule...</div>';
-      try {
-        const result = await request(`/pending-notification/${state.user.user_id}`);
-        const notifications = Array.isArray(result) ? result : (result.notifications || result.items || []);
-        $('notificationCount').textContent = `${notifications.length} ${notifications.length === 1 ? 'item' : 'items'}`;
-        list.innerHTML = notifications.length ? notifications.map(renderNotification).join('') : '<div class="empty">Nothing scheduled yet.</div>';
-      } catch (error) { $('notificationCount').textContent = ''; list.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`; }
-    }
-
-    function renderNotification(notification) {
-      const date = notification.scheduled_at ? new Date(notification.scheduled_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'No date';
-      return `<article class="notification-card"><div class="card-meta"><span>${escapeHtml(date)}</span><span>#${notification.notification_id}</span></div><h3>${escapeHtml(notification.title)}</h3><p>${escapeHtml(notification.description || 'No description')}</p><div class="card-actions"><button type="button" onclick="editNotification(${notification.notification_id})">Edit</button><button type="button" class="danger" onclick="deleteNotification(${notification.notification_id})">Delete</button></div></article>`;
-    }
-
-    $('notificationForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = { title: $('title').value.trim(), description: $('description').value.trim(), scheduled_at: new Date($('scheduledAt').value).toISOString() };
-      const wasEditing = state.editingId;
-      try {
-        const path = wasEditing ? `/notification-update/${wasEditing}` : '/notification/';
-        await request(path, { method: wasEditing ? 'PATCH' : 'POST', body: JSON.stringify(wasEditing ? payload : { user_id: state.user.user_id, ...payload }) });
-        resetForm(); showStatus('formStatus', wasEditing ? 'Notification updated.' : 'Notification created.', false); await loadNotifications();
-      } catch (error) { showStatus('formStatus', error.message); }
-    });
-
-    window.editNotification = async (id) => {
-      try {
-        const item = await request(`/notification/${id}`);
-        state.editingId = id; $('formEyebrow').textContent = '02 / revise'; $('formTitle').textContent = 'Edit notification'; $('saveButton').textContent = 'Save changes'; $('cancelButton').classList.remove('hidden');
-        $('title').value = item.title || ''; $('description').value = item.description || ''; $('scheduledAt').value = item.scheduled_at ? new Date(item.scheduled_at).toISOString().slice(0, 16) : ''; $('title').focus();
-      } catch (error) { showStatus('formStatus', error.message); }
-    };
-
-    window.deleteNotification = async (id) => {
-      if (!window.confirm('Delete this notification?')) return;
-      try { await request(`/notification/${id}`, { method: 'DELETE' }); await loadNotifications(); } catch (error) { showStatus('formStatus', error.message); }
-    };
-
-    $('cancelButton').addEventListener('click', resetForm);
-    function resetForm() { state.editingId = null; $('notificationForm').reset(); $('formEyebrow').textContent = '02 / compose'; $('formTitle').textContent = 'Create a notification'; $('saveButton').textContent = 'Create notification'; $('cancelButton').classList.add('hidden'); }
-    function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character])); }
-  </script>
+  <script src="/static/script.js"></script>
 </body>
 </html>
